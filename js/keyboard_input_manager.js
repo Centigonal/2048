@@ -34,6 +34,29 @@ KeyboardInputManager.prototype.emit = function (event, data) {
 KeyboardInputManager.prototype.listen = function () {
   var self = this;
 
+  var ctl = new Leap.Controller({enableGestures: true});
+  var tolerance = .6
+  console.log("boom!");
+
+  ctl.on('gesture', _.debounce(function (gesture, frame) {
+    if (gesture.type == "swipe") {
+      var dir = gesture.direction
+      console.log("was swipe" + " with direction " + dir.toString() + " and duration " + gesture.duration.toString());
+      if ((Math.abs(dir[0]) > tolerance || Math.abs(dir[1]) > tolerance) && gesture.duration > -1) {
+        console.log(gesture.type + " with ID " + gesture.id + " with direction " + dir.toString());
+        if (Math.abs(dir[0]) > Math.abs(dir[1])) {
+          var output = dir[0] < 0 ? 3 : 1;
+        } else {
+          var output = dir[1] < 0 ? 2 : 0;
+        }
+        console.log("emitting" + output.toString())
+        self.emit("move", output)
+      }
+    }
+  }, 100, true));
+
+  ctl.connect()
+
   var map = {
     38: 0, // Up
     39: 1, // Right
